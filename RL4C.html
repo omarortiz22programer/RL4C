@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RL4C - Racing League For Champions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #e10600;
+            --red-dim: rgba(225,6,0,0.15);
+            --bg: #070710;
+            --bg2: #0d0d1e;
+            --bg3: #111128;
+            --border: #1e1e35;
+            --text-dim: #666;
+            --text-mid: #999;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: var(--bg);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(7,7,16,0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        .logo span { color: var(--red); }
+
+        .nav-links {
+            display: flex;
+            gap: 0.3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #aaa;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #fff;
+            background: var(--red-dim);
+        }
+        .nav-links a.active { color: var(--red); }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* ── PAGES ── */
+        .page { display: none; padding-top: 70px; min-height: 100vh; }
+        .page.active { display: block; }
+
+        /* ── HERO ── */
+        .hero {
+            height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 60%, rgba(225,6,0,0.08) 0%, transparent 70%),
+                repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(255,255,255,0.015) 80px, rgba(255,255,255,0.015) 81px),
+                repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(255,255,255,0.015) 80px, rgba(255,255,255,0.015) 81px);
+        }
+
+        .hero-lines {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+        .hero-lines::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+            top: 50%;
+            left: -50%;
+            animation: scanline 4s ease-in-out infinite;
+            opacity: 0.4;
+        }
+        @keyframes scanline {
+            0%,100% { transform: translateY(-100px); opacity: 0; }
+            50% { transform: translateY(100px); opacity: 0.4; }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            padding: 0 2rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 6px;
+            color: var(--red);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .hero h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(5rem, 15vw, 11rem);
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 0.9;
+            text-transform: uppercase;
+            animation: fadeUp 0.8s ease 0.1s both;
+        }
+        .hero h1 span { color: var(--red); }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--text-mid);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 1.5rem;
+            margin-bottom: 3rem;
+            animation: fadeUp 0.8s ease 0.2s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s ease 0.3s both;
+        }
+
+        .btn-primary {
+            padding: 0.9rem 2.5rem;
+            background: var(--red);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 2px solid var(--red);
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .btn-primary:hover {
+            background: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(225,6,0,0.3);
+        }
+
+        .btn-ghost {
+            padding: 0.9rem 2.5rem;
+            background: transparent;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .btn-ghost:hover {
+            border-color: #fff;
+            transform: translateY(-3px);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── SECTION STYLES ── */
+        .section {
+            padding: 5rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 3rem;
+        }
+
+        .section-tag {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            color: var(--red);
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        /* ── TEAMS GRID ── */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .team-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s;
+            cursor: default;
+        }
+        .team-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--tc);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
+        }
+        .team-card:hover::after { transform: scaleX(1); }
+        .team-card:hover {
+            border-color: var(--tc);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .team-dot {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--tc);
+            box-shadow: 0 0 16px var(--tc);
+            margin-bottom: 1rem;
+        }
+        .team-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .team-sub { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+        /* ── STANDINGS TABLE ── */
+        .standings-wrap {
+            background: var(--bg2);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .standings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .standings-table th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg3);
+        }
+
+        .standings-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .standings-table tr:last-child td { border-bottom: none; }
+        .standings-table tbody tr:hover { background: var(--bg3); }
+
+        .pos-num {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            width: 50px;
+        }
+        .pos-1 { color: #ffd700; }
+        .pos-2 { color: #c0c0c0; }
+        .pos-3 { color: #cd7f32; }
+
+        .driver-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .driver-team {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .pts-col {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #fff;
+            text-align: right;
+        }
+
+        .team-color-pill {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* ── RACE RESULTS ── */
+        .race-header-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--red);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .race-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .race-meta { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; }
+
+        .dnf { color: #ff4444; font-weight: 600; }
+        .lap-behind { color: var(--text-mid); }
+
+        .result-pos {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .time-col {
+            font-size: 0.9rem;
+            color: var(--text-mid);
+            font-family: 'Barlow Condensed', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        /* ── REGISTER ── */
+        .register-section {
+            text-align: center;
+            padding: 6rem 5%;
+            background: var(--bg2);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .register-section::before {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(225,6,0,0.06) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            pointer-events: none;
+        }
+
+        .register-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .register-desc {
+            color: var(--text-mid);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--bg);
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+        .footer-logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin-bottom: 0.75rem;
+        }
+        footer p { color: var(--text-dim); font-size: 0.85rem; }
+        footer p + p { margin-top: 0.4rem; }
+
+        /* ── DIVIDER ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 0 5%;
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px; left: 0; right: 0;
+                background: rgba(7,7,16,0.98);
+                flex-direction: column;
+                gap: 0;
+                border-bottom: 1px solid var(--border);
+                padding: 0.5rem 0;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links li { width: 100%; }
+            .nav-links a {
+                display: block;
+                padding: 1rem 5%;
+                border-radius: 0;
+                border-bottom: 1px solid var(--border);
+                font-size: 0.9rem;
+            }
+            .hamburger { display: flex; }
+
+            .standings-table th:nth-child(3),
+            .standings-table td:nth-child(3) { display: none; }
+
+            .pts-col { font-size: 1.1rem; }
+
+            .race-header-box { padding: 1rem 1.2rem; }
+            .race-title { font-size: 1.4rem; }
+
+            .standings-table td, .standings-table th { padding: 0.85rem 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .teams-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">RL<span>4</span>C</div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#" class="active" onclick="showPage('home',this)">Inicio</a></li>
+            <li><a href="#" onclick="showPage('pilotos',this)">Pilotos</a></li>
+            <li><a href="#" onclick="showPage('equipos',this)">Equipos</a></li>
+            <li><a href="#" onclick="showPage('races',this)">Carrera</a></li>
+            <li><a href="#" onclick="showPage('registro',this)">Registro</a></li>
+        </ul>
+        <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
+    </nav>
+</header>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div class="page active" id="page-home">
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-lines"></div>
+        <div class="hero-content">
+            <p class="hero-eyebrow">Temporada 2 · F1 25</p>
+            <h1>RL<span>4</span>C</h1>
+            <p class="hero-sub">Racing League For Champions</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="showPage('pilotos', document.querySelector('[onclick*=pilotos]'))">Ver Clasificación</button>
+                <button class="btn-ghost" onclick="showPage('registro', document.querySelector('[onclick*=registro]'))">Unirse a la Liga</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="section">
+        <div class="section-header">
+            <p class="section-tag">Temporada 2 · En Curso</p>
+            <h2 class="section-title">Top 5 Pilotos</h2>
+        </div>
+        <div class="standings-wrap">
+            <table class="standings-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Piloto</th>
+                        <th>Equipo</th>
+                        <th style="text-align:right">PTS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="pos-num pos-1">1</td><td><div class="driver-name">Javivi</div></td><td><span class="team-color-pill" style="background:#1e41ff"></span>Red Bull Racing</td><td class="pts-col">362</td></tr>
+                    <tr><td class="pos-num pos-2">2</td><td><div class="driver-name">Curlalex</div></td><td><span class="team-color-pill" style="background:#2b4acb"></span>Racing Bulls</td><td class="pts-col">212</td></tr>
+                    <tr><td class="pos-num pos-3">3</td><td><div class="driver-name">Sapdi</div></td><td><span class="team-color-pill" style="background:#2b4acb"></span>Racing Bulls</td><td class="pts-col">180</td></tr>
+                    <tr><td class="pos-num">4</td><td><div class="driver-name">Kuro</div></td><td><span class="team-color-pill" style="background:#1e41ff"></span>Red Bull Racing</td><td class="pts-col">142</td></tr>
+                    <tr><td class="pos-num">5</td><td><div class="driver-name">Cristopher</div></td><td><span class="team-color-pill" style="background:#e8002d"></span>Ferrari</td><td class="pts-col">139</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align:center;margin-top:1.5rem">
+            <button class="btn-ghost" onclick="showPage('pilotos', document.querySelector('[onclick*=pilotos]'))">Ver tabla completa →</button>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+        <div class="section-header">
+            <p class="section-tag">10 Escuderías</p>
+            <h2 class="section-title">Equipos</h2>
+        </div>
+        <div class="teams-grid">
+            <div class="team-card" style="--tc:#e8002d"><div class="team-dot"></div><div class="team-name">Ferrari</div><div class="team-sub">Scuderia Ferrari HP</div></div>
+            <div class="team-card" style="--tc:#27f4d2"><div class="team-dot"></div><div class="team-name">Mercedes</div><div class="team-sub">Mercedes-AMG Petronas</div></div>
+            <div class="team-card" style="--tc:#1e41ff"><div class="team-dot"></div><div class="team-name">Red Bull</div><div class="team-sub">Red Bull Racing</div></div>
+            <div class="team-card" style="--tc:#ff8000"><div class="team-dot"></div><div class="team-name">McLaren</div><div class="team-sub">McLaren Formula 1</div></div>
+            <div class="team-card" style="--tc:#00665e"><div class="team-dot"></div><div class="team-name">Aston Martin</div><div class="team-sub">Aston Martin Aramco</div></div>
+            <div class="team-card" style="--tc:#0090ff"><div class="team-dot"></div><div class="team-name">Alpine</div><div class="team-sub">BWT Alpine F1 Team</div></div>
+            <div class="team-card" style="--tc:#52e252"><div class="team-dot"></div><div class="team-name">Kick Sauber</div><div class="team-sub">Stake F1 Team</div></div>
+            <div class="team-card" style="--tc:#005aff"><div class="team-dot"></div><div class="team-name">Williams</div><div class="team-sub">Williams Racing</div></div>
+            <div class="team-card" style="--tc:#2b4acb"><div class="team-dot"></div><div class="team-name">Racing Bulls</div><div class="team-sub">Visa Cash App RB</div></div>
+            <div class="team-card" style="--tc:#b6babd"><div class="team-dot"></div><div class="team-name">Haas</div><div class="team-sub">MoneyGram Haas F1</div></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════ PILOTOS ═══════════════ -->
+<div class="page" id="page-pilotos">
+    <div class="section">
+        <div class="section-header">
+            <p class="section-tag">Temporada 2 · Clasificación</p>
+            <h2 class="section-title">Campeonato de Pilotos</h2>
+        </div>
+        <div class="standings-wrap">
+            <table class="standings-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Piloto</th>
+                        <th>Equipo</th>
+                        <th style="text-align:right">PTS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="pos-num pos-1">1</td><td><div class="driver-name">Javivi</div></td><td><span class="team-color-pill" style="background:#1e41ff"></span>Red Bull Racing</td><td class="pts-col">362</td></tr>
+                    <tr><td class="pos-num pos-2">2</td><td><div class="driver-name">Curlalex</div></td><td><span class="team-color-pill" style="background:#2b4acb"></span>Visa Cash App RB</td><td class="pts-col">212</td></tr>
+                    <tr><td class="pos-num pos-3">3</td><td><div class="driver-name">Sapdi</div></td><td><span class="team-color-pill" style="background:#2b4acb"></span>Visa Cash App RB</td><td class="pts-col">180</td></tr>
+                    <tr><td class="pos-num">4</td><td><div class="driver-name">Kuro</div></td><td><span class="team-color-pill" style="background:#1e41ff"></span>Red Bull Racing</td><td class="pts-col">142</td></tr>
+                    <tr><td class="pos-num">5</td><td><div class="driver-name">Cristopher</div></td><td><span class="team-color-pill" style="background:#e8002d"></span>Scuderia Ferrari HP</td><td class="pts-col">139</td></tr>
+                    <tr><td class="pos-num">6</td><td><div class="driver-name">Onichan</div></td><td><span class="team-color-pill" style="background:#005aff"></span>Williams</td><td class="pts-col">114</td></tr>
+                    <tr><td class="pos-num">7</td><td><div class="driver-name">Tony</div></td><td><span class="team-color-pill" style="background:#e8002d"></span>Scuderia Ferrari HP</td><td class="pts-col">76</td></tr>
+                    <tr><td class="pos-num">8</td><td><div class="driver-name">Rastaman</div></td><td><span class="team-color-pill" style="background:#ff8000"></span>McLaren</td><td class="pts-col">61</td></tr>
+                    <tr><td class="pos-num">9</td><td><div class="driver-name">Huasteco</div></td><td><span class="team-color-pill" style="background:#52e252"></span>Kick Sauber</td><td class="pts-col">60</td></tr>
+                    <tr><td class="pos-num">10</td><td><div class="driver-name">Juan</div></td><td><span class="team-color-pill" style="background:#27f4d2"></span>Mercedes AMG-Petronas</td><td class="pts-col">60</td></tr>
+                    <tr><td class="pos-num">11</td><td><div class="driver-name">Vazquez</div></td><td><span class="team-color-pill" style="background:#00665e"></span>Aston Martin</td><td class="pts-col">56</td></tr>
+                    <tr><td class="pos-num">12</td><td><div class="driver-name">Denilson</div></td><td><span class="team-color-pill" style="background:#0090ff"></span>Alpine</td><td class="pts-col">45</td></tr>
+                    <tr><td class="pos-num">13</td><td><div class="driver-name">Snoopy</div></td><td><span class="team-color-pill" style="background:#b6babd"></span>Haas</td><td class="pts-col">33</td></tr>
+                    <tr><td class="pos-num">14</td><td><div class="driver-name">Raul</div></td><td><span class="team-color-pill" style="background:#27f4d2"></span>Mercedes AMG-Petronas</td><td class="pts-col">14</td></tr>
+                    <tr><td class="pos-num">15</td><td><div class="driver-name">Angel</div></td><td><span class="team-color-pill" style="background:#00665e"></span>Aston Martin</td><td class="pts-col">5</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ EQUIPOS ═══════════════ -->
+<div class="page" id="page-equipos">
+    <div class="section">
+        <div class="section-header">
+            <p class="section-tag">Temporada 2 · Clasificación</p>
+            <h2 class="section-title">Campeonato de Equipos</h2>
+        </div>
+        <div class="standings-wrap">
+            <table class="standings-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Equipo</th>
+                        <th style="text-align:right">PTS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="pos-num pos-1">1</td><td><span class="team-color-pill" style="background:#1e41ff"></span>Red Bull Racing</td><td class="pts-col">504</td></tr>
+                    <tr><td class="pos-num pos-2">2</td><td><span class="team-color-pill" style="background:#2b4acb"></span>Visa Cash App Racing Bulls</td><td class="pts-col">392</td></tr>
+                    <tr><td class="pos-num pos-3">3</td><td><span class="team-color-pill" style="background:#e8002d"></span>Scuderia Ferrari HP</td><td class="pts-col">215</td></tr>
+                    <tr><td class="pos-num">4</td><td><span class="team-color-pill" style="background:#005aff"></span>Williams</td><td class="pts-col">114</td></tr>
+                    <tr><td class="pos-num">5</td><td><span class="team-color-pill" style="background:#27f4d2"></span>Mercedes AMG-Petronas</td><td class="pts-col">74</td></tr>
+                    <tr><td class="pos-num">6</td><td><span class="team-color-pill" style="background:#00665e"></span>Aston Martin</td><td class="pts-col">61</td></tr>
+                    <tr><td class="pos-num">7</td><td><span class="team-color-pill" style="background:#ff8000"></span>McLaren</td><td class="pts-col">61</td></tr>
+                    <tr><td class="pos-num">8</td><td><span class="team-color-pill" style="background:#52e252"></span>Kick Sauber</td><td class="pts-col">60</td></tr>
+                    <tr><td class="pos-num">9</td><td><span class="team-color-pill" style="background:#0090ff"></span>Alpine</td><td class="pts-col">45</td></tr>
+                    <tr><td class="pos-num">10</td><td><span class="team-color-pill" style="background:#b6babd"></span>Haas</td><td class="pts-col">33</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ RACES ═══════════════ -->
+<div class="page" id="page-races">
+    <div class="section">
+        <div class="section-header">
+            <p class="section-tag">Temporada 2 · Resultados</p>
+            <h2 class="section-title">Resultados de Carrera</h2>
+        </div>
+
+        <div class="race-header-box">
+            <div>
+                <div class="race-meta">Ronda 1</div>
+                <div class="race-title">🇯🇵 Gran Premio de Japón</div>
+            </div>
+            <div style="text-align:right">
+                <div class="race-meta">Ganador</div>
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800">Javivi</div>
+                <div style="font-size:0.8rem;color:var(--text-dim)">43:46.791</div>
+            </div>
+        </div>
+
+        <div class="standings-wrap">
+            <table class="standings-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Piloto</th>
+                        <th>Equipo</th>
+                        <th>Tiempo</th>
+                        <th style="text-align:right">PTS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="result-pos pos-1">1</td><td><div class="driver-name">Javivi</div></td><td><span class="team-color-pill" style="background:#1e41ff"></span>Red Bull Racing</td><td class="time-col">43:46.791</td><td class="pts-col">25</td></tr>
+                    <tr><td class="result-pos pos-2">2</td><td><div class="driver-name">Cristopher</div></td><td><span class="team-color-pill" style="background:#e8002d"></span>Scuderia Ferrari HP</td><td class="time-col">+6.478s</td><td class="pts-col">18</td></tr>
+                    <tr><td class="result-pos pos-3">3</td><td><div class="driver-name">Curlalex</div></td><td><span class="team-color-pill" style="background:#2b4acb"></span>Visa Cash App RB</td><td class="time-col">+8.726s</td><td class="pts-col">15</td></tr>
+                    <tr><td class="result-pos">4</td><td><div class="driver-name">Spadi</div></td><td><span class="team-color-pill" style="background:#2b4acb"></span>Visa Cash App RB</td><td class="time-col">+17.037s</td><td class="pts-col">12</td></tr>
+                    <tr><td class="result-pos">5</td><td><div class="driver-name">Onichan</div></td><td><span class="team-color-pill" style="background:#005aff"></span>Williams</td><td class="time-col">+39.142s</td><td class="pts-col">10</td></tr>
+                    <tr><td class="result-pos">6</td><td><div class="driver-name">Tony_lecazador</div></td><td><span class="team-color-pill" style="background:#e8002d"></span>Scuderia Ferrari HP</td><td class="time-col">+50.632s</td><td class="pts-col">8</td></tr>
+                    <tr><td class="result-pos">7</td><td><div class="driver-name">Raulproone</div></td><td><span class="team-color-pill" style="background:#27f4d2"></span>Mercedes AMG-Petronas</td><td class="time-col">+1:08.190</td><td class="pts-col">6</td></tr>
+                    <tr><td class="result-pos">8</td><td><div class="driver-name">Huasteco</div></td><td><span class="team-color-pill" style="background:#52e252"></span>Kick Sauber</td><td class="time-col lap-behind">+1 vuelta</td><td class="pts-col">4</td></tr>
+                    <tr><td class="result-pos">9</td><td><div class="driver-name">Luisflowers</div></td><td><span class="team-color-pill" style="background:#52e252"></span>Kick Sauber</td><td class="time-col lap-behind">+1 vuelta</td><td class="pts-col">2</td></tr>
+                    <tr><td class="result-pos">10</td><td><div class="driver-name">Vazquez</div></td><td><span class="team-color-pill" style="background:#00665e"></span>Aston Martin</td><td class="time-col lap-behind">+1 vuelta</td><td class="pts-col">1</td></tr>
+                    <tr><td class="result-pos">11</td><td><div class="driver-name">Juan</div></td><td><span class="team-color-pill" style="background:#27f4d2"></span>Mercedes AMG-Petronas</td><td class="time-col dnf">DNF</td><td class="pts-col" style="color:var(--text-dim)">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ REGISTRO ═══════════════ -->
+<div class="page" id="page-registro">
+    <div class="register-section">
+        <p class="section-tag" style="margin-bottom:1rem">Temporada 2 · F1 25</p>
+        <h2 class="register-title">Únete a la Liga</h2>
+        <p class="register-desc">¿Listo para competir con los mejores pilotos? Completa el formulario y forma parte de la Racing League For Champions. La temporada está en curso, ¡no te quedes fuera!</p>
+        <button class="btn-primary" onclick="window.open('https://forms.gle/BgEShwi6LRRC2JCN7','_blank')">Registrarse Ahora</button>
+    </div>
+</div>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+    <div class="footer-logo">RL<span style="color:var(--red)">4</span>C</div>
+    <p>Racing League For Champions © 2026</p>
+    <p>F1 25 League</p>
+</footer>
+
+<script>
+    function showPage(id, linkEl) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + id).classList.add('active');
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        if (linkEl) linkEl.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // close mobile menu
+        document.getElementById('navLinks').classList.remove('open');
+    }
+
+    function toggleMenu() {
+        document.getElementById('navLinks').classList.toggle('open');
+    }
+</script>
+
+</body>
+</html>
